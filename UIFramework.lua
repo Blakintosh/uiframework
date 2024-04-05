@@ -1,5 +1,5 @@
 local DECLARATION = [[
-	UI Framework alpha v1.1.0 - root component
+	UI Framework alpha v1.2.0
 	Copyright (C) 2023 blakintosh
 
 	This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,11 @@ end
 -- The container for the sequences system
 if not UIS then
 	UIS = require("ui.uif.UIFramework_Sequences")
+end
+
+-- The container for the utility functions
+if not UIU then
+    UIU = require("ui.uif.UIFramework_Utility")
 end
 
 -- The container for the theme system
@@ -80,7 +85,7 @@ end
 require("ui.uif.UIFramework_Theme")
 
 UIF.__debug = true -- Will do something in a later version
-UIF.__textResolutionScalar = 2
+UIF.__primitiveResolutionScalar = 2
 
 UIF.__SafeCall = function(func, contextLabel)
 	if UIF.__debug then
@@ -97,15 +102,15 @@ end
 
 require("ui.uif.UIFramework_Utility")
 
-UIF.__PreSetupAbstractions = function(self, controller)
+UIF.__PreCommonSetup = function(self, controller)
     self.__dependents = {}
     self.__states = {}
     self.__sequences = {}
 
-    UpgradeWidgetFeatures(self)
+    UIU.UpgradeWidgetFeatures(self)
 
     self.UpgradeFunctionalityFor = function(self, target)
-        UpgradeWidgetFeatures(target)
+        UIU.UpgradeWidgetFeatures(target)
     end
 
     self.AddDependent = function(self, dependent)
@@ -141,7 +146,7 @@ UIF.__PreSetupAbstractions = function(self, controller)
     end
 end
 
-UIF.__PostSetupAbstractions = function(self, controller)
+UIF.__PostCommonSetup = function(self, controller)
     self.clipsPerState = {}
     local stateConditions = {}
     local anyStateConditionsGiven = false
@@ -202,13 +207,13 @@ UIF.__ConstructElement = function(self, menu, controller, identifier, creationFu
         end, "The pre-load function for an instance of widget '"..identifier.."'' failed to evaluate.")
     end
 
-    UIF.__PreSetupAbstractions(self, controller)
+    UIF.__PreCommonSetup(self, controller)
 
     UIF.__SafeCall(function()
         creationFunction(self, menu, controller)
     end, "Creation of the UI instance for widget '"..identifier.."'' failed to evaluate.")
 
-    UIF.__PostSetupAbstractions(self, controller)
+    UIF.__PostCommonSetup(self, controller)
 
     if postLoadFunction then
         UIF.__SafeCall(function()
@@ -291,13 +296,13 @@ UIF.DefineMenu = function(identifier, creationFunction, preLoadFunction, postLoa
 			end, "The pre-load function for an instance of menu '"..identifier.."'' failed to evaluate.")
 		end
 
-		UIF.__PreSetupAbstractions(self, controller)
+		UIF.__PreCommonSetup(self, controller)
 
 		UIF.__SafeCall(function()
 			creationFunction(self, controller)
 		end, "Creation of the UI instance for menu '"..identifier.."'' failed to evaluate.")
 
-        UIF.__PostSetupAbstractions(self, controller)
+        UIF.__PostCommonSetup(self, controller)
 
 		if postLoadFunction then
 			UIF.__SafeCall(function()
@@ -310,4 +315,4 @@ UIF.DefineMenu = function(identifier, creationFunction, preLoadFunction, postLoa
 end
 
 -- Add stock widgets
-require("ui.uif.UIFramework_Widgets")
+require("ui.uif.widgets._Includes")

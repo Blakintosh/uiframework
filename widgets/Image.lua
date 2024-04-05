@@ -1,20 +1,3 @@
-local DECLARATION = [[
-	UI Framework alpha v1.1.0 - widgets component
-	Copyright (C) 2023 blakintosh
-
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <https://www.gnu.org/licenses/>.
-]]
 
 local function SetBoundsToParent(self, parent, resolutionScalar)
 	-- Resize the wrapper to the parent's size, accounting for scaling.
@@ -66,8 +49,8 @@ local function SetTextAnchorsToParent(self, parent, resolutionScalar)
     end
 end
 
-UIF.DefineElement("Text", function(self, menu, controller)
-	local resolutionScalar = UIF.__textResolutionScalar or 0.5
+UIF.DefineElement("Image", function(self, menu, controller)
+	local resolutionScalar = UIF.__primitiveResolutionScalar or 1
 
 	-- Wrapper which is downscaled to allow for high resolution text
 	self.wrapper = LUI.UIElement.new()
@@ -106,7 +89,7 @@ UIF.DefineElement("Text", function(self, menu, controller)
 		SetTextAnchorsToParent(self.text, element, resolutionScalar)
 	end)
 
-	self.text = LUI.UIText.new()
+	self.image = LUI.UIText.new()
 
     self.__interceptor = ""
 
@@ -136,9 +119,9 @@ UIF.DefineElement("Text", function(self, menu, controller)
 	end
 
 	self.getTextWidth = function(self)
-		return self.text:getTextWidth() / UIF.__textResolutionScalar
+		return self.text:getTextWidth() / UIF.__primitiveResolutionScalar
 	end
 	
-	self.wrapper:addElement(self.text)
+	self.wrapper:addElement(self.image)
 	self:AddDependent(self.wrapper)
 end, nil, nil)
