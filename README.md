@@ -1,5 +1,4 @@
-# UI Framework
-![UI Framework Logo](https://gscode.net/images/uif.png)
+# UI Framework (v1.2.0 alpha)
 
 A new paradigm for building UI in Call of Duty: Black Ops III.
 
@@ -161,6 +160,32 @@ self.text = UIE.Text.new()
 self:AddDependent(self.text)
 ```
 will increase the resolution your text elements render at from 720p to 1440p.
+
+### Component property abstractions
+The `UIE.Text` widget contains abstractions to allow for certain appearance properties, such as the font, colour or text to be get and set easily.
+
+e.g.
+```lua
+-- Before
+local text = UIE.Text.new()
+text:setTTF("fonts/escom.ttf") -- or UIT.Fonts["Escom"]
+-- ...
+
+text:subscribeToModel(Engine.GetModel(Engine.GetModelForController(controller), "currentWeapon.ammoInClip", function(model)
+    local modelValue = Engine.GetModelValue(model)
+    if modelValue then
+        text:setText(Engine.Localize(modelValue))
+    end
+end))
+
+-- With abstractions
+local text = UIE.Text.new()
+text.Font = "fonts/escom.ttf" -- or "Escom"
+
+text:SubscribeText({
+    modelName = "currentWeapon.ammoInClip"
+})
+```
 
 ### and other features.
 
