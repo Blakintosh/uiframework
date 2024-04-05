@@ -16,8 +16,6 @@ local DECLARATION = [[
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-require("ui.blak.utility.DebugUtils")
-
 local function SetBoundsToParent(self, parent, resolutionScalar)
 	-- Resize the wrapper to the parent's size, accounting for scaling.
 	local width, height = parent:getLocalSize()
