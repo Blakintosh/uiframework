@@ -179,7 +179,7 @@ text:subscribeToModel(Engine.GetModel(Engine.GetModelForController(controller), 
 end))
 ```
 **After**
-```
+```lua
 -- With abstractions
 local text = UIE.Text.new()
 text.Props.Font = "fonts/escom.ttf" -- or "Escom"
