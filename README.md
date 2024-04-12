@@ -164,7 +164,7 @@ will increase the resolution your text elements render at from 720p to 1440p.
 ### Component property abstractions
 The `UIE.Text` widget contains abstractions to allow for certain appearance properties, such as the font, colour or text to be get and set easily.
 
-e.g.
+**Before**
 ```lua
 -- Before
 local text = UIE.Text.new()
@@ -177,10 +177,12 @@ text:subscribeToModel(Engine.GetModel(Engine.GetModelForController(controller), 
         text:setText(Engine.Localize(modelValue))
     end
 end))
-
+```
+**After**
+```
 -- With abstractions
 local text = UIE.Text.new()
-text.Font = "fonts/escom.ttf" -- or "Escom"
+text.Props.Font = "fonts/escom.ttf" -- or "Escom"
 
 text:SubscribeText({
     modelName = "currentWeapon.ammoInClip"
