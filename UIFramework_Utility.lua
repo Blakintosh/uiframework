@@ -1,5 +1,3 @@
-require("ui.blak.utility.DebugUtils")
-
 local UIU = {}
 
 UIU.UpgradeWidgetFeatures = function(self)
