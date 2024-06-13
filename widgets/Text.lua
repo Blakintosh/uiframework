@@ -13,6 +13,7 @@ end
 local function SetTextAnchorsToParent(self, parent, resolutionScalar)
 	-- Get the parent's bounds and anchors.
 	local width, height = parent:getLocalSize()
+
 	local anchorL, anchorR, startPos, endPos = parent.__anchorL, parent.__anchorR, parent.__startPosLR, parent.__endPosLR
 	local anchorT, anchorB, startPos2, endPos2 = parent.__anchorT, parent.__anchorB, parent.__startPosTB, parent.__endPosTB
 
@@ -27,14 +28,18 @@ local function SetTextAnchorsToParent(self, parent, resolutionScalar)
             else
                 self:setLeftRight(false, true, -width * resolutionScalar, 0)
             end
+        -- Width estimate may not be reliable. Assume we can fit the whole text using text width
+        elseif anchorL == 1 and anchorR == 1 then
+            local textWidth = self:getTextWidth() / 2
+            self:setLeftRight(false, false, -(textWidth / 2) * resolutionScalar, (textWidth / 2) * resolutionScalar)
         else
-            Engine.ComError(Enum.errorCode.ERROR_UI, "Double or fractional anchoring is not supported by UIE.Text.")
+            Engine.ComError(Enum.errorCode.ERROR_UI, "Double or fractional anchoring is not supported by UIE.Text. Trace: \nsetLeftRight on Element ID "..self.id..", anchors ("..anchorL..", "..anchorR.."). Proposed width "..width)
         end
     end
 
     if anchorT ~= nil then
         -- If the text is centered, then we need to set the bounds to the center of the wrapper.
-        if anchorT == 0 and anchorB == 0 then
+        if anchorT == 0 and anchorB == 0 or (height > 0 and anchorT == 1 and anchorB == 1) then
             self:setTopBottom(false, false, -(height / 2) * resolutionScalar, (height / 2) * resolutionScalar)
         elseif anchorT ~= 1 or anchorB ~= 1 then
         -- If the text is anchored to the top or bottom, then we need to set the bounds to the top or bottom of the wrapper.
@@ -43,8 +48,12 @@ local function SetTextAnchorsToParent(self, parent, resolutionScalar)
             else
                 self:setTopBottom(false, true, -height * resolutionScalar, 0)
             end
+        -- Height estimate may not be reliable. Assume we can fit the whole text using text height
+        -- elseif anchorL == 1 and anchorR == 1 then
+        --     local textWidth = self:getTextHeight() / 2
+        --     self:setLeftRight(false, false, -(textHeight / 2) * resolutionScalar, (textHeight / 2) * resolutionScalar)
         else
-            Engine.ComError(Enum.errorCode.ERROR_UI, "Double or fractional anchoring is not supported by UIE.Text.")
+            Engine.ComError(Enum.errorCode.ERROR_UI, "Double or fractional anchoring is not supported by UIE.Text. Trace: \nsetTopBottom on Element ID "..self.id..", anchors ("..anchorT..", "..anchorB.."). Proposed height "..height)
         end
     end
 end
@@ -209,3 +218,41 @@ UIF.DefineElement("Text", function(self, menu, controller)
 	self.wrapper:addElement(self.text)
 	self:AddDependent(self.wrapper)
 end, nil, nil)
+
+UIE["TightText"] = InheritFrom(LUI.UIElement)
+
+UIE["TightText"].new = function(menu, controller)
+    local self = UIE.Text.new()
+
+    LUI.OverrideFunction_CallOriginalFirst(self, "setText", function(element, text)
+        local textWidth = self:getTextWidth()
+        local thisLeftAnchor, thisRightAnchor, thisStart, thisEnd = self:getLocalLeftRight()
+        local childLeftAnchor, childRightAnchor, childStart, childEnd = self.text:getLocalLeftRight()
+
+        if textWidth > 0 then
+            self.savedWidth = textWidth + 2
+            if not self.widthOverridden then
+                -- Engine.ComError(Enum.errorCode.ERROR_UI, [[setText trace:
+                --     This: (]]..tostring(thisLeftAnchor)..[[ ]]..tostring(thisRightAnchor)..[[, ]]..tostring(thisStart)..[[, ]]..tostring(thisEnd)..[[)
+                --     Child: (]]..tostring(childLeftAnchor)..[[, ]]..tostring(childRightAnchor)..[[, ]]..tostring(childStart)..[[, ]]..tostring(childEnd)..[[)
+                --     Text width: (self source: ]]..tostring(textWidth)..[[, self.text source: ]]..tostring(self.text:getTextWidth())..[[)
+
+                --     Proposing (]]..tostring(thisLeftAnchor)..[[, ]]..tostring(thisRightAnchor)..[[, ]]..tostring(thisStart)..[[, ]]..tostring(thisStart + self.savedWidth)..[[)
+                -- ]])
+                self:setLeftRight( thisLeftAnchor, thisRightAnchor, thisStart, thisStart + self.savedWidth )
+            end
+        else
+            self:setLeftRight( thisLeftAnchor, thisRightAnchor, thisStart, thisStart )
+        end
+	end)
+
+    -- self.test = LUI.UIImage.new()
+    -- self.test:setRGB(1, 0, 0)
+    -- self.test:setAlpha(0.25)
+    -- self.test:setLeftRight(true, true, 0, 0)
+    -- self.test:setTopBottom(true, true, 0, 0)
+
+    -- self:addElement(self.test)
+
+    return self
+end
